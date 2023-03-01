@@ -228,28 +228,34 @@ fun GoalsItem(Id: Int, title: String, steps: Int, goalsModel: GoalsModel, onActi
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(10.dp, 5.dp)
-                    ) {
-                        Text(text = "$title", fontSize = 29.sp, color = Color.Blue)
-                        Text(text = "$steps steps", fontSize = 18.sp, color = Color.Blue)
-                    }
-                Button(
-                    onClick = {
-                        goalsModel.deleteGoals(Id)
-                        onAction("$title goal deleted")
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color.White
-                    ),
-                    elevation = null
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(10.dp, 5.dp)
                 ) {
-                    Icon(
-                        Icons.Filled.Delete,
-                        contentDescription = null,
-                        tint = Color.Red
-                    )
+                    Text(text = "$title", fontSize = 29.sp, color = Color.Blue)
+                    Text(text = "$steps steps", fontSize = 18.sp, color = Color.Blue)
+                }
+
+                Row() {
+                    Button(){
+                        
+                    }
+                    Button(
+                        onClick = {
+                            goalsModel.deleteGoals(Id)
+                            onAction("$title goal deleted")
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = Color.White
+                        ),
+                        elevation = null
+                    ) {
+                        Icon(
+                            Icons.Filled.Delete,
+                            contentDescription = null,
+                            tint = Color.Red
+                        )
+                    }
                 }
             }
         }

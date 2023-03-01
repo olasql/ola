@@ -88,7 +88,7 @@ fun MainContent(goalsModel: GoalsModel){
             else if(navigator == "Goals")
                 GoalsPage(goalsModel)
             else if(navigator == "History")
-                HistoryPage()
+                HistoryPage(goalsModel)
         }
     }
 

@@ -6,8 +6,9 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.fitnessapp.database.dao.GoalsDao
 import com.example.fitnessapp.database.entities.Goals
+import com.example.fitnessapp.database.entities.GoalsHistory
 
-@Database(entities = [(Goals::class)], version = 1)
+@Database(entities = [(Goals::class), (GoalsHistory::class)], version = 1)
 abstract class FitnessAppRoomDatabase: RoomDatabase() {
     abstract fun goalsDao(): GoalsDao
     companion object{

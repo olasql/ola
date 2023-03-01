@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.example.fitnessapp.database.entities.Goals
+import com.example.fitnessapp.database.entities.GoalsHistory
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -18,6 +19,8 @@ interface GoalsDao {
     @Query("SELECT * FROM goals")
     fun all(): LiveData<List<Goals>>
 
+    @Query("SELECT * FROM goals_history")
+    fun getHistory() : LiveData<List<GoalsHistory>>
     @Query("SELECT * FROM goals")
     fun getAll() : Flow<List<Goals>>
 

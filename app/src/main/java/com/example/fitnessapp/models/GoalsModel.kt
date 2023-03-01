@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.example.fitnessapp.database.FitnessAppRoomDatabase
 import com.example.fitnessapp.database.entities.Goals
+import com.example.fitnessapp.database.entities.GoalsHistory
 import com.example.fitnessapp.repositories.GoalsRepository
 import kotlinx.coroutines.flow.Flow
 
@@ -22,6 +23,7 @@ class GoalsModel(application: Application)  : ViewModel() {
         //goalState.value = goalsRepo.mAllGoals.value
     }
     val goalsList: LiveData<List<Goals>> = goalsRepo.allGoals
+    val goalsHistList: LiveData<List<GoalsHistory>> = goalsRepo.goalsHistory
     val mGoalsList: Flow<List<Goals>> = goalsRepo.mAllGoals
 
     fun getAllGoals(): Flow<List<Goals>> {

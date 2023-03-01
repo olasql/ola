@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.fitnessapp.database.dao.GoalsDao
 import com.example.fitnessapp.database.entities.Goals
+import com.example.fitnessapp.database.entities.GoalsHistory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -12,6 +13,7 @@ import kotlinx.coroutines.launch
 class GoalsRepository(private val goalsDao: GoalsDao)
 {
     val allGoals : LiveData<List<Goals>> = goalsDao.all() //MutableLiveData<List<Goals>>()
+    val goalsHistory: LiveData<List<GoalsHistory>> = goalsDao.getHistory()
     private var goalState = MutableLiveData<List<Goals>>(listOf<Goals>())
     var mAllGoals : Flow<List<Goals>> = goalsDao.getAll()
 //    var lo : LiveData<Goals> = MutableLiveData<>
