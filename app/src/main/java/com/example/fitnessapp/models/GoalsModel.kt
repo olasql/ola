@@ -5,40 +5,61 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.example.fitnessapp.database.FitnessAppRoomDatabase
 import com.example.fitnessapp.database.entities.Goals
+import com.example.fitnessapp.database.entities.GoalsData
 import com.example.fitnessapp.database.entities.GoalsHistory
+import com.example.fitnessapp.database.entities.HistoryData
 import com.example.fitnessapp.repositories.GoalsRepository
-import kotlinx.coroutines.flow.Flow
+import java.text.SimpleDateFormat
+import java.util.*
 
 class GoalsModel(application: Application)  : ViewModel() {
 
 
     private val goalsRepo: GoalsRepository
 
-//    private var goalState = MutableStateFlow(listOf<Goals>())
     init {
         val fitnessAppDb = FitnessAppRoomDatabase.getInstance(application)
         val goalsDao = fitnessAppDb.goalsDao()
         goalsRepo = GoalsRepository(goalsDao)
-        //goalsRepo.mAllGoals.collect()
-        //goalState.value = goalsRepo.mAllGoals.value
     }
-    val goalsList: LiveData<List<Goals>> = goalsRepo.allGoals
+    val goalsList: LiveData<List<GoalsData>> = goalsRepo.allGoals
     val goalsHistList: LiveData<List<GoalsHistory>> = goalsRepo.goalsHistory
-    val mGoalsList: Flow<List<Goals>> = goalsRepo.mAllGoals
-
-    fun getAllGoals(): Flow<List<Goals>> {
-       return goalsRepo.getAllGoals()
-    }
-    fun getGoals(): List<Goals>? {
-        return goalsRepo.getGoals()
-    }
+    val todayHistory: LiveData<HistoryData?> = goalsRepo.todayHistory
 
     fun deleteGoals(goalId: Int){
         goalsRepo.deleteGoals(goalId)
     }
 
+    fun deleteHistory(histId: Int){
+        goalsRepo.deleteHistory(histId)
+    }
+
+    fun deleteAllHistory(){
+        goalsRepo.deleteAllHistory()
+    }
+
+    fun addGoalHistory(goalsHistory: GoalsHistory){
+        goalsRepo.addGoalHistory(goalsHistory)
+    }
+
     fun addGoals(goals: Goals){
         goalsRepo.addGoals(goals)
-        //getAllGoals()
+    }
+
+    fun getGoalHistory(date: String): GoalsHistory?{
+        return goalsRepo.getGoalsHistory(date)
+    }
+    fun setTodayGoal(goalsHistory: GoalsHistory) : String{
+        var gH = getGoalHistory(goalsHistory.date)
+        var nowDt = SimpleDateFormat("yyyy-MM-dd").format(Date())
+        if(gH == null) {
+            addGoalHistory(goalsHistory)
+            return "Goal for the day set"
+        }
+        return "Goal already set for the day"
+    }
+
+    fun updateSteps(steps: Int, histId: Int){
+        goalsRepo.updateSteps(steps, histId)
     }
 }

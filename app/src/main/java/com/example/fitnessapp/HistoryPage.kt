@@ -31,7 +31,9 @@ fun HistoryPage(
             horizontalAlignment = Alignment.End
         ){
             Button(
-                onClick = {},
+                onClick = {
+                          goalsModel.deleteAllHistory()
+                },
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = Color.White
                 ),
@@ -44,13 +46,13 @@ fun HistoryPage(
             modifier = Modifier.padding(7.dp).fillMaxSize()
         ) {
             items(goalHistory) { history ->
-                HistoryItem(history.date.toString(), history.steps)
+                HistoryItem(history.id, history.date.toString(), history.steps, goalsModel)
             }
         }
     }
 }
 @Composable
-fun HistoryItem(title: String, steps: Int){
+fun HistoryItem(id: Int,title: String, steps: Int, histModel: GoalsModel){
     Card(
         modifier = Modifier.fillMaxWidth().padding(0.dp, 7.dp),
         backgroundColor = Color.White,
@@ -65,10 +67,12 @@ fun HistoryItem(title: String, steps: Int){
                 modifier = Modifier.padding(15.dp, 5.dp)
             ) {
                 Text(text = "$title", fontSize = 19.sp, color = Color.Blue, fontWeight = FontWeight.Bold)
-                Text(text = "$steps steps", fontSize = 18.sp, color = Color.Blue)
+                Text(text = "$steps steps completed", fontSize = 18.sp, color = Color.Blue)
             }
             Button(
-                onClick = {},
+                onClick = {
+                    histModel.deleteHistory(id)
+                },
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = Color.White
                 ),

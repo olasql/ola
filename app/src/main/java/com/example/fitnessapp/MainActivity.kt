@@ -84,7 +84,7 @@ fun MainContent(goalsModel: GoalsModel){
 
             ) {
             if(navigator == "Home")
-                HomePage()
+                HomePage(goalsModel)
             else if(navigator == "Goals")
                 GoalsPage(goalsModel)
             else if(navigator == "History")

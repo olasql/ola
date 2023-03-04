@@ -1,22 +1,20 @@
 package com.example.fitnessapp.repositories
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.example.fitnessapp.database.dao.GoalsDao
 import com.example.fitnessapp.database.entities.Goals
+import com.example.fitnessapp.database.entities.GoalsData
 import com.example.fitnessapp.database.entities.GoalsHistory
+import com.example.fitnessapp.database.entities.HistoryData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class GoalsRepository(private val goalsDao: GoalsDao)
 {
-    val allGoals : LiveData<List<Goals>> = goalsDao.all() //MutableLiveData<List<Goals>>()
+    val allGoals : LiveData<List<GoalsData>> = goalsDao.all() //MutableLiveData<List<Goals>>()
     val goalsHistory: LiveData<List<GoalsHistory>> = goalsDao.getHistory()
-    private var goalState = MutableLiveData<List<Goals>>(listOf<Goals>())
-    var mAllGoals : Flow<List<Goals>> = goalsDao.getAll()
-//    var lo : LiveData<Goals> = MutableLiveData<>
+    val todayHistory: LiveData<HistoryData?> = goalsDao.getTodayHistory()
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     fun addGoals(newGoals: Goals) {
@@ -25,22 +23,38 @@ class GoalsRepository(private val goalsDao: GoalsDao)
         }
     }
 
-    fun getGoals() : List<Goals>? {
-//        coroutineScope.launch(Dispatchers.IO) {
-            return goalsDao.all().value
-//        }
-    }
-    fun getAllGoals() : Flow<List<Goals>> {
-//        coroutineScope.launch(Dispatchers.IO) {
-            return goalsDao.getAll()
-            println("Fetched")
-//        }
+    fun addGoalHistory(newHistory: GoalsHistory) {
+        coroutineScope.launch(Dispatchers.IO) {
+            goalsDao.createHistory(newHistory)
+        }
     }
 
     fun deleteGoals(goalId: Int){
         coroutineScope.launch(Dispatchers.IO) {
             goalsDao.delete(goalId)
         }
+    }
+
+    fun updateSteps(steps: Int, histId: Int){
+        coroutineScope.launch(Dispatchers.IO) {
+            goalsDao.updateSteps(steps, histId)
+        }
+    }
+
+    fun deleteHistory(histId: Int){
+        coroutineScope.launch(Dispatchers.IO) {
+            goalsDao.deleteHistory(histId)
+        }
+    }
+
+    fun deleteAllHistory(){
+        coroutineScope.launch(Dispatchers.IO) {
+            goalsDao.deleteAllHistory()
+        }
+    }
+
+    fun getGoalsHistory(date:String) : GoalsHistory?{
+        return goalsDao.findHistory(date)
     }
 
 }

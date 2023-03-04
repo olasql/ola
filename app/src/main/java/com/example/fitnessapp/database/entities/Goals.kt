@@ -19,7 +19,7 @@ class Goals{
     @NonNull
     var steps: Int = 0
 
-    constructor(){}
+    constructor()
     constructor(User: Int, Title: String, Steps: Int){
         this.userId = User
         this.title  = Title
@@ -32,4 +32,13 @@ class Goals{
 //        this.title  = Title
 //        this.steps = Steps
 //    }
+}
+
+class GoalsData{
+    var id:Int = 0
+    var userId: Int = 0
+    var title: String = ""
+    var steps: Int = 0
+    var date: String? = null
+    var goal: Int = 0
 }

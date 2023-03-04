@@ -27,20 +27,20 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.text.isDigitsOnly
 import com.example.fitnessapp.database.entities.Goals
+import com.example.fitnessapp.database.entities.GoalsHistory
 import com.example.fitnessapp.models.GoalsModel
+import java.text.SimpleDateFormat
+import java.util.*
 
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "StateFlowValueCalledInComposition")
 @Composable
 fun GoalsPage(
     goalsModel: GoalsModel
 ){
-//    var Items = List<>
-    //goalsModel.getAllGoals()
+    val allGoals by goalsModel.goalsList.observeAsState(listOf())
     var openAddModal by rememberSaveable {mutableStateOf(false)}
     var showNotice by rememberSaveable {mutableStateOf("")}
-    val allGoals by goalsModel.goalsList.observeAsState(listOf())
-    //val mGoals by goalsModel.mGoalsList.collectAsState(listOf())//Lifecycle.State List<Goals>(200) { Goals() }
-    val mGoals = goalsModel.getAllGoals().collectAsState(listOf())
+
     Scaffold(
         backgroundColor = Color.White,
         floatingActionButton = {
@@ -56,30 +56,27 @@ fun GoalsPage(
             }
         }
     ) {
-        var lop = listOf<Goals>()
-        lop = mGoals.value
-//        if(allGoals.isNullOrEmpty())
-//            lop = mGoals
-//        else
-//            lop = allGoals
         if(openAddModal == true)
             AddGoalsModal(goalsModel, onCloseClick = { openAddModal = it}, onAdded = {showNotice = it})
-        if(showNotice.isNotEmpty()) {
-            Column(
-                modifier = Modifier.padding(7.dp, 0.dp).fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
+
+        Column(
+            modifier = Modifier.padding(7.dp, 0.dp).fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            if(showNotice.isNotEmpty()) {
                 Surface(
                     color = Color.Green
                 ) {
                     Text(showNotice, color = Color.Black, modifier = Modifier.padding(15.dp))
                 }
-                LazyColumn(
-                    modifier = Modifier.padding(7.dp).fillMaxSize().selectableGroup()
-                ) {
-                    items(allGoals) { goals ->
-                        GoalsItem(goals.id, goals.title, goals.steps, goalsModel, onAction = {showNotice = it})
-                    }
+            }
+            LazyColumn(
+                modifier = Modifier.padding(7.dp).fillMaxSize().selectableGroup()
+            ) {
+                println("Fetched")
+                //println(allGoals.toString())
+                items(allGoals) { goals ->
+                    GoalsItem(goals.id, goals.title, goals.date, goals.goal, goals.steps, goalsModel, onAction = {showNotice = it})
                 }
             }
         }
@@ -140,7 +137,7 @@ fun AddGoalsModal(goalsModel: GoalsModel, onCloseClick: (Boolean) -> Unit, onAdd
                 ) {
                     OutlinedTextField(
                         modifier = Modifier.padding(0.dp, 5.dp),
-                        isError = !goalTitleError.isNullOrEmpty(),
+                        isError = goalTitleError.isNotEmpty(),
                         //                    modifier = Modifier.?
                         value = goalTitle, placeholder = { Text("Title") },
                         singleLine = true, onValueChange = { txt -> goalTitle = txt },
@@ -157,7 +154,7 @@ fun AddGoalsModal(goalsModel: GoalsModel, onCloseClick: (Boolean) -> Unit, onAdd
                     OutlinedTextField(
                         modifier = Modifier.padding(0.dp, 5.dp),
                         value = goalSteps,
-                        isError = !goalStepsError.isNullOrEmpty(),
+                        isError = goalStepsError.isNotEmpty(),
                         placeholder = { Text("Steps") },
                         singleLine = true, onValueChange = { txt -> goalSteps = txt },
                         shape = RoundedCornerShape(10),
@@ -175,10 +172,10 @@ fun AddGoalsModal(goalsModel: GoalsModel, onCloseClick: (Boolean) -> Unit, onAdd
                     onClick = {
                         goalStepsError = ""
                         goalTitleError = ""
-                          if(goalTitle.isNullOrEmpty()){
+                          if(goalTitle.isEmpty()){
                               goalTitleError = "Title is required"
                           }
-                        if(goalSteps.isNullOrEmpty()){
+                        if(goalSteps.isEmpty()){
                             goalStepsError = "Steps is required"
                         }else{
                             if(!goalSteps.isDigitsOnly()){
@@ -213,7 +210,7 @@ fun validateTitle(){
 
 }
 @Composable
-fun GoalsItem(Id: Int, title: String, steps: Int, goalsModel: GoalsModel, onAction: (String) -> Unit){
+fun GoalsItem(Id: Int, title: String, date: String?, goal: Int, steps: Int, goalsModel: GoalsModel, onAction: (String) -> Unit){
     Column(
         modifier = Modifier.selectableGroup().fillMaxSize(),
     ) {
@@ -236,26 +233,48 @@ fun GoalsItem(Id: Int, title: String, steps: Int, goalsModel: GoalsModel, onActi
                     Text(text = "$steps steps", fontSize = 18.sp, color = Color.Blue)
                 }
 
-                Row() {
-                    Button(){
-                        
-                    }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(13.dp, 0.dp)
+                ) {
+                    var nowDt = SimpleDateFormat("yyyy-MM-dd").format(Date())
+                    var isSelected = date == nowDt
                     Button(
                         onClick = {
-                            goalsModel.deleteGoals(Id)
-                            onAction("$title goal deleted")
+                            onAction("")
+                            var res = goalsModel.setTodayGoal(GoalsHistory(
+                                      nowDt,
+                                      1,
+                                      Id,
+                                      0
+                                  ))
+                            onAction(res)
                         },
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = Color.White
-                        ),
-                        elevation = null
-                    ) {
-                        Icon(
-                            Icons.Filled.Delete,
-                            contentDescription = null,
-                            tint = Color.Red
+                            backgroundColor = if(isSelected) Color.Gray else  Color.Blue,
+                            contentColor = Color.White
                         )
+                    ){
+                        if(isSelected) Text("selected") else Text("select")
                     }
+                    if(!isSelected)
+                        Button(
+                            onClick = {
+                                onAction("")
+                                goalsModel.deleteGoals(Id)
+                                onAction("$title goal deleted")
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = Color.White
+                            ),
+                            elevation = null
+                        ) {
+                            Icon(
+                                Icons.Filled.Delete,
+                                contentDescription = null,
+                                tint = Color.Red
+                            )
+                        }
                 }
             }
         }

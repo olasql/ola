@@ -8,7 +8,7 @@ import com.example.fitnessapp.database.dao.GoalsDao
 import com.example.fitnessapp.database.entities.Goals
 import com.example.fitnessapp.database.entities.GoalsHistory
 
-@Database(entities = [(Goals::class), (GoalsHistory::class)], version = 1)
+@Database(entities = [Goals::class, GoalsHistory::class], version = 3, exportSchema = false)
 abstract class FitnessAppRoomDatabase: RoomDatabase() {
     abstract fun goalsDao(): GoalsDao
     companion object{
@@ -24,6 +24,7 @@ abstract class FitnessAppRoomDatabase: RoomDatabase() {
                         FitnessAppRoomDatabase::class.java,
                         "fitness_app_database"
                     ).fallbackToDestructiveMigration()
+                        .allowMainThreadQueries()
                         .build()
 
                     INSTANCE = instance
