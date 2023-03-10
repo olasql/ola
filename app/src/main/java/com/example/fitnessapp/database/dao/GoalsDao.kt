@@ -11,6 +11,7 @@ import com.example.fitnessapp.database.entities.HistoryData
 
 @Dao
 interface GoalsDao {
+
     @Insert
     fun create(goals: Goals)
     @Insert
@@ -31,6 +32,9 @@ interface GoalsDao {
     fun findHistory(date:String) : GoalsHistory?
     @Query("DELETE FROM goals_history WHERE date <> date()")
     fun deleteAllHistory()
+
+    @Query("UPDATE goals SET steps = :steps WHERE id = :id")
+    fun updateGoals(steps:Int, id:Int)
     @Query("UPDATE goals_history SET steps = :steps WHERE id = :id")
     fun updateSteps(steps: Int, id: Int)
     @Query("DELETE FROM goals_history WHERE id = :histId AND date <> date()")

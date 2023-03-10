@@ -27,6 +27,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.text.isDigitsOnly
 import com.example.fitnessapp.database.entities.Goals
+import com.example.fitnessapp.database.entities.GoalsData
 import com.example.fitnessapp.database.entities.GoalsHistory
 import com.example.fitnessapp.models.GoalsModel
 import java.text.SimpleDateFormat
@@ -76,7 +77,7 @@ fun GoalsPage(
                 println("Fetched")
                 //println(allGoals.toString())
                 items(allGoals) { goals ->
-                    GoalsItem(goals.id, goals.title, goals.date, goals.goal, goals.steps, goalsModel, onAction = {showNotice = it})
+                    GoalsItem(goals, goalsModel, onAction = {showNotice = it})
                 }
             }
         }
@@ -86,9 +87,11 @@ fun GoalsPage(
 @SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun AddGoalsModal(goalsModel: GoalsModel, onCloseClick: (Boolean) -> Unit, onAdded: (String) -> Unit){
-    var goalTitle by rememberSaveable { mutableStateOf("") }
-    var goalSteps by rememberSaveable { mutableStateOf("") }
+fun AddGoalsModal(goalsModel: GoalsModel, onCloseClick: (Boolean) -> Unit, onAdded: (String) -> Unit, metFunc:String = "add", goalData:GoalsData = GoalsData()){
+    var iniTitle:String = if(!goalData.title.isNullOrEmpty()) goalData.title else ""
+    var iniSteps:String = if(goalData.steps != 0) goalData.steps.toString() else ""
+    var goalTitle by rememberSaveable { mutableStateOf(iniTitle) }
+    var goalSteps by rememberSaveable { mutableStateOf(iniSteps) }
     var goalTitleError by rememberSaveable { mutableStateOf("") }
     var goalStepsError by rememberSaveable { mutableStateOf("") }
     Dialog(
@@ -114,7 +117,10 @@ fun AddGoalsModal(goalsModel: GoalsModel, onCloseClick: (Boolean) -> Unit, onAdd
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Add new goals", fontSize = 20.sp, modifier = Modifier.padding(2.dp, 8.dp))
+                    if(metFunc == "add")
+                        Text("Add new goals", fontSize = 20.sp, modifier = Modifier.padding(2.dp, 8.dp))
+                    else if (metFunc == "edit")
+                        Text("Edit goal", fontSize = 20.sp, modifier = Modifier.padding(2.dp, 8.dp))
                     Button(
                         onClick = { onCloseClick(false) },
                         elevation = null,
@@ -156,7 +162,8 @@ fun AddGoalsModal(goalsModel: GoalsModel, onCloseClick: (Boolean) -> Unit, onAdd
                         value = goalSteps,
                         isError = goalStepsError.isNotEmpty(),
                         placeholder = { Text("Steps") },
-                        singleLine = true, onValueChange = { txt -> goalSteps = txt },
+                        singleLine = true,
+                        onValueChange = { txt -> goalSteps = txt },
                         shape = RoundedCornerShape(10),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
                             placeholderColor = Color.Gray,
@@ -184,13 +191,26 @@ fun AddGoalsModal(goalsModel: GoalsModel, onCloseClick: (Boolean) -> Unit, onAdd
                         }
 
                         if(goalStepsError.isEmpty() && goalTitleError.isEmpty()){
-                            goalsModel.addGoals(Goals(
-                                1,
-                                goalTitle,
-                                goalSteps.toInt()
-                            ))
+                            if(metFunc == "add") {
+                                goalsModel.addGoals(
+                                    Goals(
+                                        1,
+                                        goalTitle,
+                                        goalSteps.toInt()
+                                    )
+                                )
+                            }
+                            else if (metFunc == "edit"){
+                                goalsModel.updateGoalsSteps(
+                                    goalSteps.toInt(),
+                                    goalData.id
+                                )
+                            }
                             onCloseClick(false)
-                            onAdded("New goal added")
+                            if(metFunc == "add")
+                                onAdded("New goal added")
+                            else if(metFunc == "edit")
+                                onAdded("${goalData.title} edited")
                             //Toast.makeText(cnt, "Goals added successfully", Toast.LENGTH_SHORT).show()
                         }
                     },
@@ -199,7 +219,10 @@ fun AddGoalsModal(goalsModel: GoalsModel, onCloseClick: (Boolean) -> Unit, onAdd
                         disabledBackgroundColor = Color.Gray
                     )
                 ){
-                    Text("Add", fontSize = 15.sp, color = Color.White)
+                    if(metFunc == "add")
+                        Text("Add", fontSize = 15.sp, color = Color.White)
+                    else if (metFunc == "edit")
+                        Text("Edit", fontSize = 15.sp, color = Color.White)
                 }
             }
         }
@@ -210,11 +233,12 @@ fun validateTitle(){
 
 }
 @Composable
-fun GoalsItem(Id: Int, title: String, date: String?, goal: Int, steps: Int, goalsModel: GoalsModel, onAction: (String) -> Unit){
+fun GoalsItem (goal:GoalsData, goalsModel: GoalsModel, onAction: (String) -> Unit){
+    var openEditModal by rememberSaveable {mutableStateOf(false)}
+    var showNotice by rememberSaveable {mutableStateOf("")}
     Column(
         modifier = Modifier.selectableGroup().fillMaxSize(),
     ) {
-
         Card(
             modifier = Modifier.fillMaxWidth().padding(0.dp, 7.dp),
             backgroundColor = Color.White,
@@ -229,8 +253,8 @@ fun GoalsItem(Id: Int, title: String, date: String?, goal: Int, steps: Int, goal
                     verticalArrangement = Arrangement.Center,
                     modifier = Modifier.padding(10.dp, 5.dp)
                 ) {
-                    Text(text = "$title", fontSize = 29.sp, color = Color.Blue)
-                    Text(text = "$steps steps", fontSize = 18.sp, color = Color.Blue)
+                    Text(text = "${goal.title}", fontSize = 29.sp, color = Color.Blue)
+                    Text(text = "${goal.steps} steps", fontSize = 18.sp, color = Color.Blue)
                 }
 
                 Row(
@@ -238,31 +262,56 @@ fun GoalsItem(Id: Int, title: String, date: String?, goal: Int, steps: Int, goal
                     modifier = Modifier.padding(13.dp, 0.dp)
                 ) {
                     var nowDt = SimpleDateFormat("yyyy-MM-dd").format(Date())
-                    var isSelected = date == nowDt
+                    var isSelected = goal.date == nowDt
+
+                    if (openEditModal)
+                        AddGoalsModal(
+                            goalsModel,
+                            onCloseClick = { openEditModal = it },
+                            onAdded = { onAction(it) },
+                            "edit",
+                            goal
+                        )
+
                     Button(
                         onClick = {
                             onAction("")
-                            var res = goalsModel.setTodayGoal(GoalsHistory(
-                                      nowDt,
-                                      1,
-                                      Id,
-                                      0
-                                  ))
+                            var res = goalsModel.setTodayGoal(
+                                GoalsHistory(
+                                    nowDt,
+                                    1,
+                                    goal.id,
+                                    0
+                                )
+                            )
                             onAction(res)
                         },
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = if(isSelected) Color.Gray else  Color.Blue,
+                            backgroundColor = if (isSelected) Color.Gray else Color.Blue,
                             contentColor = Color.White
                         )
-                    ){
-                        if(isSelected) Text("selected") else Text("select")
+                    ) {
+                        if (isSelected) Text("selected") else Text("select")
                     }
-                    if(!isSelected)
+
+                    Button(
+                        onClick = {
+                            openEditModal = !openEditModal
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = Color.Yellow,
+                            contentColor = Color.Black
+                        ),
+                        modifier = Modifier.padding(5.dp, 0.dp)
+                    ) {
+                        Text("edit")
+                    }
+                    if (!isSelected) {
                         Button(
                             onClick = {
                                 onAction("")
-                                goalsModel.deleteGoals(Id)
-                                onAction("$title goal deleted")
+                                goalsModel.deleteGoals(goal.id)
+                                onAction("${goal.title} goal deleted")
                             },
                             colors = ButtonDefaults.buttonColors(
                                 backgroundColor = Color.White
@@ -275,6 +324,7 @@ fun GoalsItem(Id: Int, title: String, date: String?, goal: Int, steps: Int, goal
                                 tint = Color.Red
                             )
                         }
+                    }
                 }
             }
         }

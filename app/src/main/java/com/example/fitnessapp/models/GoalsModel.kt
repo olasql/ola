@@ -62,4 +62,8 @@ class GoalsModel(application: Application)  : ViewModel() {
     fun updateSteps(steps: Int, histId: Int){
         goalsRepo.updateSteps(steps, histId)
     }
+
+    fun updateGoalsSteps(steps: Int, id: Int){
+        goalsRepo.updateGoals(steps, id)
+    }
 }

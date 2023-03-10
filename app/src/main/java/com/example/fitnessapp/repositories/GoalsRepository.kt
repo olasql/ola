@@ -41,6 +41,12 @@ class GoalsRepository(private val goalsDao: GoalsDao)
         }
     }
 
+    fun updateGoals(steps: Int, id: Int){
+        coroutineScope.launch(Dispatchers.IO) {
+            goalsDao.updateGoals(steps, id)
+        }
+    }
+
     fun deleteHistory(histId: Int){
         coroutineScope.launch(Dispatchers.IO) {
             goalsDao.deleteHistory(histId)
