@@ -30,6 +30,7 @@ import com.example.fitnessapp.database.entities.Goals
 import com.example.fitnessapp.database.entities.GoalsData
 import com.example.fitnessapp.database.entities.GoalsHistory
 import com.example.fitnessapp.models.GoalsModel
+import com.example.trigger.ContextTrigger
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -76,6 +77,13 @@ fun GoalsPage(
             ) {
                 println("Fetched")
                 //println(allGoals.toString())
+                var firstData = allGoals.firstOrNull()
+                if(firstData != null){
+                    //var nowDt = SimpleDateFormat("yyyy-MM-dd").format(Date())
+                    //if(firstData.date != nowDt){
+                        ContextTrigger.registerPrevHistory(firstData.steps)
+                    //}
+                }
                 items(allGoals) { goals ->
                     GoalsItem(goals, goalsModel, onAction = {showNotice = it})
                 }
@@ -206,6 +214,7 @@ fun AddGoalsModal(goalsModel: GoalsModel, onCloseClick: (Boolean) -> Unit, onAdd
                                     goalSteps.toInt(),
                                     goalData.id
                                 )
+                                ContextTrigger.triggerStepCounter(goalSteps.toInt(),null)
                             }
                             onCloseClick(false)
                             if(metFunc == "add")
@@ -285,6 +294,7 @@ fun GoalsItem (goal:GoalsData, goalsModel: GoalsModel, onAction: (String) -> Uni
                                     0
                                 )
                             )
+                            ContextTrigger.triggerStepCounter(goal.steps, 0)
                             onAction(res)
                         },
                         colors = ButtonDefaults.buttonColors(

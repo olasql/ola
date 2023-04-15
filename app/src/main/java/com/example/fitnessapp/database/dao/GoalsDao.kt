@@ -18,7 +18,7 @@ interface GoalsDao {
     fun createHistory(history: GoalsHistory)
     @Query("SELECT * FROM goals WHERE id= :goalId")
     fun find(goalId: Int): List<Goals>
-    @Query("SELECT goals.*,goals_history.goal, goals_history.date FROM goals LEFT JOIN goals_history ON goals.id = goals_history.goal")
+    @Query("SELECT goals.*,goals_history.goal, goals_history.date FROM goals LEFT JOIN goals_history ON goals.id = goals_history.goal ORDER BY goals_history.date DESC")
     fun all() : LiveData<List<GoalsData>>
 
     @Query("DELETE FROM goals WHERE id = :goalId")

@@ -20,7 +20,7 @@ class NotificationAlert {
     lateinit var builder: Notification.Builder
     private val channelId = "i.apps.notifications"
     private val description = "Trigger Notifications"
-    fun sendNotificication(context: Context, data: NotificationData){
+    fun sendNotification(context: Context, data: NotificationData, Id: Int = 1){
         notificationManager = context.getSystemService(android.content.Context.NOTIFICATION_SERVICE) as NotificationManager
 
         val intent = Intent(context, MainActivity::class.java)
@@ -49,6 +49,6 @@ class NotificationAlert {
                 .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.ic_launcher_foreground))
                 .setContentIntent(pendingIntent)
         }
-        notificationManager.notify(1234, builder.build())
+        notificationManager.notify(Id, builder.build())
     }
 }
