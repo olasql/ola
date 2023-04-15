@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fitnessapp.models.GoalsModel
+import com.example.trigger.ContextTrigger
 
 @Composable
 fun savedRecBtn(){
@@ -115,6 +116,9 @@ fun HomePage(
                                 todayHistory?.steps!!,
                                 it
                             )
+                            todayHistory?.goalSteps?.let { it1 -> ContextTrigger.triggerStepCounter(it1,
+                                todayHistory?.steps!!
+                            ) }
                         }
                     },
                     modifier = Modifier.padding(0.dp, 10.dp).width(120.dp),

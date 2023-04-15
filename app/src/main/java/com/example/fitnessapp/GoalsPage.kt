@@ -143,6 +143,7 @@ fun AddGoalsModal(goalsModel: GoalsModel, onCloseClick: (Boolean) -> Unit, onAdd
                 ) {
                     OutlinedTextField(
                         modifier = Modifier.padding(0.dp, 5.dp),
+                        enabled = metFunc == "add",
                         isError = goalTitleError.isNotEmpty(),
                         //                    modifier = Modifier.?
                         value = goalTitle, placeholder = { Text("Title") },

@@ -23,11 +23,14 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fitnessapp.models.GoalsModel
 import com.example.fitnessapp.ui.theme.FitnessAppTheme
+import com.example.trigger.ContextTrigger
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            ContextTrigger.globalAppContext = this
+
             FitnessAppTheme {
                 // A surface container using the 'background' color from the theme
                 val owner = LocalViewModelStoreOwner.current
